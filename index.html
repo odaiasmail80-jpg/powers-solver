@@ -1,144 +1,222 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حلال الأسس الشامل</title>
-    <link rel="manifest" href="manifest.json">
-    <style>
-        :root {
-            --bg-color: #0b1329;
-            --card-bg: #162247;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #1e293b;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-            border: 1px solid var(--border-color);
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: var(--text-main);
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 12px;
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: var(--accent-color);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #0f172a;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 1.1rem;
-            word-break: break-all;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>حلال الأسس المحترف</title>
+  
+  <!-- PWA Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1329">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="حلال الأسس">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    * { -webkit-tap-highlight-color: transparent; user-select: none; }
+    body { font-family: 'Cairo', sans-serif; background-color: #0b1329; color: #f1f5f9; overflow-x: hidden; }
+    .tab-btn.active { border-bottom: 3px solid #00e89d; color: #00e89d; font-weight: bold; }
+    .glass-card { background: rgba(21, 35, 62, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    input { user-select: text !important; }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 select-none">
 
-    <div class="container">
-        <h1>حلال الأسس الشامل</h1>
-        
-        <div class="input-group">
-            <label for="base">الأساس (Base):</label>
-            <input type="number" id="base" placeholder="أدخل الاساس">
+  <!-- Header -->
+  <header class="w-full max-w-lg text-center my-2">
+    <h1 class="text-3xl font-extrabold text-[#00e89d] tracking-wide">حلال الأسس ⚡</h1>
+    <p class="text-xs text-slate-400 mt-1">الحل الذكي الشامل لمسائل المعادلات والأسس</p>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="flex w-full max-w-lg glass-card rounded-2xl mb-4 p-1.5 justify-around text-sm font-semibold shadow-2xl">
+    <button onclick="switchTab('calc')" id="btn-calc" class="tab-btn active py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الحاسبة 🧮</button>
+    <button onclick="switchTab('cam')" id="btn-cam" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الكاميرا 📷</button>
+    <button onclick="switchTab('rules')" id="btn-rules" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">القواعد 📖</button>
+  </nav>
+
+  <!-- Main View Area -->
+  <main class="w-full max-w-lg flex-1">
+    
+    <!-- TAB 1: CALCULATOR -->
+    <div id="tab-calc" class="glass-card rounded-3xl p-5 shadow-2xl space-y-5">
+      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
+        <span>⚡</span> حاسبة الأسس المباشرة والمعادلات
+      </h2>
+      
+      <div class="space-y-3">
+        <label class="block text-xs font-semibold text-slate-300">حساب قيمة أس مباشر (aᵇ):</label>
+        <div class="flex gap-2 dir-ltr">
+          <input type="number" id="base" placeholder="الأساس (a)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-[#00e89d] transition">
+          <input type="number" id="exponent" placeholder="الأس (b)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-[#00e89d] transition">
         </div>
+        <button onclick="calculateDirectPower()" class="w-full bg-[#00e89d] text-slate-950 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition">احسب الناتج</button>
+      </div>
 
-        <div class="input-group">
-            <label for="exponent">الأس (Exponent):</label>
-            <input type="number" id="exponent" placeholder="أدخل الأس">
+      <div class="space-y-3 border-t border-slate-700/50 pt-4">
+        <label class="block text-xs font-semibold text-slate-300">حل المجهول في الأس (aˣ = c):</label>
+        <div class="flex gap-2 dir-ltr">
+          <input type="number" id="eq-base" placeholder="الأساس (a)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-sky-400 transition">
+          <input type="number" id="eq-target" placeholder="الناتج (c)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-sky-400 transition">
         </div>
+        <button onclick="solveExponentVariable()" class="w-full bg-sky-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition">أوجد قيمة الأس المجهول (x)</button>
+      </div>
 
-        <button onclick="calculate()">احسب</button>
-
-        <div class="result" id="result">النتيجة ستظهر هنا</div>
+      <div id="calc-output" class="p-4 bg-[#060d1d] rounded-2xl border border-slate-800 hidden text-center shadow-inner">
+        <div class="text-xs text-slate-400 mb-1">النتيجة:</div>
+        <div id="calc-result" class="text-2xl font-black text-[#00e89d]"></div>
+      </div>
     </div>
 
-    <script>
-        function calculate() {
-            const base = parseFloat(document.getElementById('base').value);
-            const exponent = parseFloat(document.getElementById('exponent').value);
-            const resultDiv = document.getElementById('result');
+    <!-- TAB 2: CAMERA -->
+    <div id="tab-cam" class="glass-card rounded-3xl p-5 shadow-2xl hidden space-y-4">
+      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
+        <span>📷</span> الكاميرا والماسح الضوئي
+      </h2>
+      <p class="text-xs text-slate-400 leading-relaxed">التقط صورة لمعادلة الأسس للتعرف عليها وتحليلها تلقائياً.</p>
+      
+      <div class="flex flex-col items-center gap-4 pt-2">
+        <input type="file" id="cam-input" accept="image/*" capture="environment" class="hidden" onchange="processImage(this)">
+        <button onclick="document.getElementById('cam-input').click()" class="w-full bg-[#00e89d] text-slate-950 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
+          📷 تشغيل الكاميرا / اختيار صورة
+        </button>
+        
+        <div id="ocr-status" class="text-xs text-amber-400 font-bold hidden animate-pulse">جاري تحليل الصورة...</div>
+        <img id="image-preview" class="max-h-48 rounded-2xl border border-slate-700 hidden w-full object-contain shadow-md">
+        
+        <div id="cam-output" class="w-full p-4 bg-[#060d1d] rounded-2xl border border-slate-800 hidden space-y-2">
+          <div class="text-xs text-slate-400">النص المتعرق عليه:</div>
+          <div id="ocr-text" class="text-sm text-white font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800"></div>
+          <div class="text-xs text-slate-400 border-t border-slate-800 pt-2">النتيجة:</div>
+          <div id="cam-result" class="text-xl font-bold text-[#00e89d]"></div>
+        </div>
+      </div>
+    </div>
 
-            if (isNaN(base) || isNaN(exponent)) {
-                resultDiv.innerHTML = "الرجاء إدخال أرقام صحيحة!";
-                return;
-            }
+    <!-- TAB 3: RULES -->
+    <div id="tab-rules" class="glass-card rounded-3xl p-5 shadow-2xl hidden space-y-3">
+      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
+        <span>📖</span> دليل جميع القواعد
+      </h2>
+      
+      <div class="space-y-2.5 text-xs">
+        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800/80">
+          <div class="font-bold text-[#00e89d] text-sm">1. ضرب الأسس (نفس الأساس)</div>
+          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">aⁿ × aᵐ = a⁽ⁿ⁺ᵐ⁾</div>
+        </div>
 
-            const res = Math.pow(base, exponent);
-            resultDiv.innerHTML = `النتيجة: <strong>${res}</strong>`;
+        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800/80">
+          <div class="font-bold text-[#00e89d] text-sm">2. قسمة الأسس (نفس الأساس)</div>
+          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">aⁿ ÷ aᵐ = a⁽ⁿ⁻ᵐ⁾</div>
+        </div>
+
+        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800/80">
+          <div class="font-bold text-[#00e89d] text-sm">3. رفع أُس لأُس</div>
+          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">(aⁿ)ᵐ = a⁽ⁿᵐ⁾</div>
+        </div>
+
+        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800/80">
+          <div class="font-bold text-[#00e89d] text-sm">4. الأس الصفري والأس السالب</div>
+          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">a⁰ = 1  |  a⁻ⁿ = 1 / aⁿ</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="w-full max-w-lg text-center my-3 text-[10px] text-slate-500">
+    تطبيق حلال الأسس الشامل © 2026
+  </footer>
+
+  <script>
+    // Register Service Worker for PWA Installation
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered'))
+          .catch(err => console.log('SW Error', err));
+      });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+      document.getElementById('btn-' + tab).classList.add('active');
+    }
+
+    function calculateDirectPower() {
+      const b = parseFloat(document.getElementById('base').value);
+      const e = parseFloat(document.getElementById('exponent').value);
+      const output = document.getElementById('calc-output');
+      const res = document.getElementById('calc-result');
+
+      if (isNaN(b) || isNaN(e)) {
+        alert("يرجى إدخال الأساس والأس بشكل صحيح");
+        return;
+      }
+
+      res.innerHTML = `${b}<sup>${e}</sup> = ${Math.pow(b, e)}`;
+      output.classList.remove('hidden');
+    }
+
+    function solveExponentVariable() {
+      const b = parseFloat(document.getElementById('eq-base').value);
+      const c = parseFloat(document.getElementById('eq-target').value);
+      const output = document.getElementById('calc-output');
+      const res = document.getElementById('calc-result');
+
+      if (isNaN(b) || isNaN(c) || b <= 0 || c <= 0 || b === 1) {
+        alert("يرجى إدخال أعداد موجبة مع مراعاة أن الأساس لا يساوي 1");
+        return;
+      }
+
+      const x = Math.log(c) / Math.log(b);
+      res.innerHTML = `x = ${parseFloat(x.toFixed(4))}`;
+      output.classList.remove('hidden');
+    }
+
+    async function processImage(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const img = document.getElementById('image-preview');
+      const status = document.getElementById('ocr-status');
+      const output = document.getElementById('cam-output');
+      const ocrText = document.getElementById('ocr-text');
+      const camResult = document.getElementById('cam-result');
+
+      img.src = URL.createObjectURL(file);
+      img.classList.remove('hidden');
+      status.classList.remove('hidden');
+      output.classList.add('hidden');
+
+      try {
+        const worker = await Tesseract.createWorker('eng');
+        const ret = await worker.recognize(file);
+        await worker.terminate();
+
+        const text = ret.data.text.trim();
+        ocrText.innerText = text || "تعذر قراءة النص";
+        
+        const match = text.match(/(\d+)\s*[\^𝖝*]\s*(\d+)/);
+        if (match) {
+          const b = parseFloat(match[1]);
+          const e = parseFloat(match[2]);
+          camResult.innerText = `${b}^${e} = ${Math.pow(b, e)}`;
+        } else {
+          camResult.innerText = "يرجى التأكد من وضوح الصورة كـ (a^b)";
         }
-    </script>
 
+        status.classList.add('hidden');
+        output.classList.remove('hidden');
+      } catch (err) {
+        status.innerText = "حدث خطأ أثناء معالجة الصورة.";
+      }
+    }
+  </script>
 </body>
 </html>
