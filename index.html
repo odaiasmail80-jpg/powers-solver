@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>المحنك لحل الأسس</title>
+  <title>المحنك لحل الأسس والمتغيرات</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -33,23 +33,51 @@
       box-sizing: border-box;
     }
     h2 { text-align: center; color: var(--accent); margin-top: 0; font-size: 20px; }
+    
+    .media-section {
+      background: #0d1117;
+      border: 1px dashed var(--accent);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .media-btn {
+      background: #21262d;
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-block;
+      margin: 4px;
+    }
+    #image-preview {
+      max-width: 100%;
+      max-height: 180px;
+      margin-top: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
     .tabs {
       display: flex;
       gap: 5px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       overflow-x: auto;
       padding-bottom: 5px;
     }
     .tab-btn {
       flex: 1;
-      padding: 8px 10px;
+      padding: 8px;
       background: #0d1117;
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
-      font-size: 13px;
+      font-size: 12px;
     }
     .tab-btn.active {
       background: var(--accent);
@@ -58,16 +86,16 @@
     }
     .panel { display: none; }
     .panel.active { display: block; }
-    .field { margin-bottom: 12px; }
-    label { display: block; margin-bottom: 5px; font-size: 14px; }
-    input {
+    .field { margin-bottom: 10px; }
+    label { display: block; margin-bottom: 4px; font-size: 13px; }
+    input, select {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: #0d1117;
       color: #fff;
-      font-size: 15px;
+      font-size: 14px;
       box-sizing: border-box;
     }
     button.calc-btn {
@@ -77,19 +105,19 @@
       border-radius: 8px;
       background: var(--accent);
       color: #fff;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 8px;
     }
     .result-box {
-      margin-top: 15px;
+      margin-top: 12px;
       padding: 12px;
       background: #0d1117;
       border-radius: 8px;
       border: 1px solid var(--accent);
       word-break: break-all;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.5;
     }
   </style>
@@ -97,58 +125,78 @@
 <body>
 
   <div class="card">
-    <h2>⚡ حلال مسائل الأسس الشامل</h2>
+    <h2>⚡ حلال الأسس والمتغيرات</h2>
 
+    <!-- قسم اختيار الصورة / الكاميرا للمعاينة أوفلاين -->
+    <div class="media-section">
+      <label class="media-btn">
+        📷 التقاط صورة
+        <input type="file" accept="image/*" capture="environment" onchange="previewImage(event)" style="display:none;">
+      </label>
+      <label class="media-btn">
+        🖼️ من المعرض
+        <input type="file" accept="image/*" onchange="previewImage(event)" style="display:none;">
+      </label>
+      <img id="image-preview" alt="معاينة المسألة">
+    </div>
+
+    <!-- التبويبات -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('p1', event)">أس مباشر</button>
-      <button class="tab-btn" onclick="switchTab('p2', event)">ضرب الأسس</button>
-      <button class="tab-btn" onclick="switchTab('p3', event)">قسمة الأسس</button>
-      <button class="tab-btn" onclick="switchTab('p4', event)">قوة القوة</button>
-      <button class="tab-btn" onclick="switchTab('p5', event)">أس كسر / جذر</button>
+      <button class="tab-btn" onclick="switchTab('p_solve', event)">🔍 إيجاد المتغير (x)</button>
+      <button class="tab-btn" onclick="switchTab('p2', event)">ضرب وقسمة</button>
+      <button class="tab-btn" onclick="switchTab('p3', event)">قوة / جذر</button>
     </div>
 
     <!-- 1. الأس المباشر -->
     <div id="p1" class="panel active">
       <div class="field"><label>الأساس (a):</label><input type="number" id="base1" placeholder="مثال: 2"></div>
-      <div class="field"><label>الأس (n):</label><input type="number" id="exp1" placeholder="مثال: -3 أو 5"></div>
+      <div class="field"><label>الأس (n):</label><input type="number" id="exp1" placeholder="مثال: 5"></div>
       <button class="calc-btn" onclick="calcPower()">حساب aⁿ</button>
       <div class="result-box" id="res1">النتيجة ستظهر هنا...</div>
     </div>
 
-    <!-- 2. ضرب الأسس -->
+    <!-- 2. إيجاد المتغير x -->
+    <div id="p_solve" class="panel">
+      <div class="field">
+        <label>اختر نوع المعادلة:</label>
+        <select id="eqType" onchange="toggleEqInputs()">
+          <option value="exp">أوجد الأس المجهول: aˣ = b</option>
+          <option value="base">أوجد الأساس المجهول: xⁿ = b</option>
+        </select>
+      </div>
+
+      <div id="eq_exp_inputs">
+        <div class="field"><label>الأساس (a):</label><input type="number" id="solve_a" placeholder="مثال: 2"></div>
+        <div class="field"><label>الناتج النهائي (b):</label><input type="number" id="solve_b" placeholder="مثال: 8"></div>
+      </div>
+
+      <div id="eq_base_inputs" style="display:none;">
+        <div class="field"><label>الأس المعلموم (n):</label><input type="number" id="solve_n" placeholder="مثال: 3"></div>
+        <div class="field"><label>الناتج النهائي (b):</label><input type="number" id="solve_b2" placeholder="مثال: 27"></div>
+      </div>
+
+      <button class="calc-btn" onclick="solveVariable()">استخراج قيمة المتغير (x)</button>
+      <div class="result-box" id="res_solve">النتيجة ستظهر هنا...</div>
+    </div>
+
+    <!-- 3. ضرب وقسمة الأسس -->
     <div id="p2" class="panel">
-      <div class="field"><label>الأساس المشترك (a):</label><input type="number" id="base2" placeholder="مثال: 3"></div>
+      <div class="field"><label>الأساس (a):</label><input type="number" id="base2" placeholder="مثال: 3"></div>
       <div class="field"><label>الأس الأول (m):</label><input type="number" id="exp2_1" placeholder="مثال: 4"></div>
       <div class="field"><label>الأس الثاني (n):</label><input type="number" id="exp2_2" placeholder="مثال: 2"></div>
-      <button class="calc-btn" onclick="calcMultiply()">حساب aᵐ × aⁿ</button>
+      <button class="calc-btn" onclick="calcMultiply()">حساب الضرب (aᵐ × aⁿ)</button>
+      <button class="calc-btn" onclick="calcDivide()" style="background:#21262d; margin-top:5px;">حساب القسمة (aᵐ ÷ aⁿ)</button>
       <div class="result-box" id="res2">النتيجة ستظهر هنا...</div>
     </div>
 
-    <!-- 3. قسمة الأسس -->
+    <!-- 4. قوة القوة والجذور -->
     <div id="p3" class="panel">
-      <div class="field"><label>الأساس المشترك (a):</label><input type="number" id="base3" placeholder="مثال: 5"></div>
-      <div class="field"><label>أس البسط (m):</label><input type="number" id="exp3_1" placeholder="مثال: 7"></div>
-      <div class="field"><label>أس المقام (n):</label><input type="number" id="exp3_2" placeholder="مثال: 3"></div>
-      <button class="calc-btn" onclick="calcDivide()">حساب aᵐ ÷ aⁿ</button>
+      <div class="field"><label>الأساس (a):</label><input type="number" id="base3" placeholder="مثال: 27"></div>
+      <div class="field"><label>البسط / الأس الداخلي (m):</label><input type="number" id="exp3_m" placeholder="مثال: 2"></div>
+      <div class="field"><label>المقام / دليل الجذر (n):</label><input type="number" id="exp3_n" placeholder="مثال: 3"></div>
+      <button class="calc-btn" onclick="calcFractional()">حساب (aᵐ/ⁿ)</button>
       <div class="result-box" id="res3">النتيجة ستظهر هنا...</div>
-    </div>
-
-    <!-- 4. قوة القوة -->
-    <div id="p4" class="panel">
-      <div class="field"><label>الأساس (a):</label><input type="number" id="base4" placeholder="مثال: 2"></div>
-      <div class="field"><label>الأس الداخلي (m):</label><input type="number" id="exp4_1" placeholder="مثال: 3"></div>
-      <div class="field"><label>الأس الخارجي (n):</label><input type="number" id="exp4_2" placeholder="مثال: 4"></div>
-      <button class="calc-btn" onclick="calcPowerOfPower()">حساب (aᵐ)ⁿ</button>
-      <div class="result-box" id="res4">النتيجة ستظهر هنا...</div>
-    </div>
-
-    <!-- 5. الأس الكسري والجذور -->
-    <div id="p5" class="panel">
-      <div class="field"><label>الأساس (a):</label><input type="number" id="base5" placeholder="مثال: 27"></div>
-      <div class="field"><label>البسط - قوة (m):</label><input type="number" id="exp5_m" placeholder="مثال: 2"></div>
-      <div class="field"><label>المقام - دليل الجذر (n):</label><input type="number" id="exp5_n" placeholder="مثال: 3"></div>
-      <button class="calc-btn" onclick="calcFractional()">حساب aᵐ/ⁿ (ⁿ√aᵐ)</button>
-      <div class="result-box" id="res5">النتيجة ستظهر هنا...</div>
     </div>
 
   </div>
@@ -160,6 +208,20 @@
       });
     }
 
+    // معاينة الصورة بدون إنترنت 100%
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById('image-preview');
+          img.src = e.target.result;
+          img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function switchTab(panelId, event) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -167,12 +229,17 @@
       event.target.classList.add('active');
     }
 
+    function toggleEqInputs() {
+      const type = document.getElementById('eqType').value;
+      document.getElementById('eq_exp_inputs').style.display = type === 'exp' ? 'block' : 'none';
+      document.getElementById('eq_base_inputs').style.display = type === 'base' ? 'block' : 'none';
+    }
+
     function computePower(b, e) {
-      if (b === 0n && e <= 0n) return "خطأ رياضيات (كمية غير معينة)";
+      if (b === 0n && e <= 0n) return "خطأ رياضيات";
       if (e === 0n) return "1";
       if (e > 0n) return (b ** e).toString();
-      const posExp = -e;
-      const val = b ** posExp;
+      const val = b ** (-e);
       return `1 / ${val.toString()} (≈ ${(1 / Number(val)).toFixed(8)})`;
     }
 
@@ -182,35 +249,55 @@
       document.getElementById('res1').innerHTML = `<b>النتيجة:</b> ${computePower(BigInt(b), BigInt(e))}`;
     }
 
+    // إيجاد قيمة المتغير x
+    function solveVariable() {
+      const type = document.getElementById('eqType').value;
+      const res = document.getElementById('res_solve');
+
+      if (type === 'exp') {
+        const a = parseFloat(document.getElementById('solve_a').value);
+        const b = parseFloat(document.getElementById('solve_b').value);
+
+        if (isNaN(a) || isNaN(b) || a <= 0 || a === 1 || b <= 0) {
+          res.innerText = "⚠️ يرجى إدخال قيم موجبة حيث (a > 0 و a ≠ 1 و b > 0)";
+          return;
+        }
+        const x = Math.log(b) / Math.log(a);
+        res.innerHTML = `<b>المعادلة:</b> ${a}<sup>x</sup> = ${b}<br><b>قيمة المتغير (x):</b> ${Number.isInteger(x) ? x : x.toFixed(6)}`;
+      } else {
+        const n = parseFloat(document.getElementById('solve_n').value);
+        const b = parseFloat(document.getElementById('solve_b2').value);
+
+        if (isNaN(n) || isNaN(b) || n === 0) {
+          res.innerText = "⚠️ ادخل قيم صحيحة للأس والناتج";
+          return;
+        }
+        const x = Math.pow(b, 1 / n);
+        res.innerHTML = `<b>المعادلة:</b> x<sup>${n}</sup> = ${b}<br><b>قيمة المتغير (x):</b> ${Number.isInteger(x) ? x : x.toFixed(6)}`;
+      }
+    }
+
     function calcMultiply() {
       const b = document.getElementById('base2').value, e1 = document.getElementById('exp2_1').value, e2 = document.getElementById('exp2_2').value;
       if (!b || !e1 || !e2) return document.getElementById('res2').innerText = "⚠️ أدخل البيانات كاملة";
-      const totalExp = BigInt(e1) + BigInt(e2);
-      document.getElementById('res2').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
+      const total = BigInt(e1) + BigInt(e2);
+      document.getElementById('res2').innerHTML = `<b>النتيجة:</b> ${b}<sup>${total}</sup> = ${computePower(BigInt(b), total)}`;
     }
 
     function calcDivide() {
-      const b = document.getElementById('base3').value, e1 = document.getElementById('exp3_1').value, e2 = document.getElementById('exp3_2').value;
-      if (!b || !e1 || !e2) return document.getElementById('res3').innerText = "⚠️ أدخل البيانات كاملة";
-      const totalExp = BigInt(e1) - BigInt(e2);
-      document.getElementById('res3').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
-    }
-
-    function calcPowerOfPower() {
-      const b = document.getElementById('base4').value, e1 = document.getElementById('exp4_1').value, e2 = document.getElementById('exp4_2').value;
-      if (!b || !e1 || !e2) return document.getElementById('res4').innerText = "⚠️ أدخل البيانات كاملة";
-      const totalExp = BigInt(e1) * BigInt(e2);
-      document.getElementById('res4').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
+      const b = document.getElementById('base2').value, e1 = document.getElementById('exp2_1').value, e2 = document.getElementById('exp2_2').value;
+      if (!b || !e1 || !e2) return document.getElementById('res2').innerText = "⚠️ أدخل البيانات كاملة";
+      const total = BigInt(e1) - BigInt(e2);
+      document.getElementById('res2').innerHTML = `<b>النتيجة:</b> ${b}<sup>${total}</sup> = ${computePower(BigInt(b), total)}`;
     }
 
     function calcFractional() {
-      const a = parseFloat(document.getElementById('base5').value);
-      const m = parseFloat(document.getElementById('exp5_m').value);
-      const n = parseFloat(document.getElementById('exp5_n').value);
-      if (isNaN(a) || isNaN(m) || isNaN(n) || n === 0) return document.getElementById('res5').innerText = "⚠️ أدخل أرقاماً صحيحة (المقام لا يساوي 0)";
-      
+      const a = parseFloat(document.getElementById('base3').value);
+      const m = parseFloat(document.getElementById('exp3_m').value);
+      const n = parseFloat(document.getElementById('exp3_n').value);
+      if (isNaN(a) || isNaN(m) || isNaN(n) || n === 0) return document.getElementById('res3').innerText = "⚠️ أدخل بيانات صحيحة";
       const val = Math.pow(a, m / n);
-      document.getElementById('res5').innerHTML = `<b>الصيغة الجذرية:</b> <sup>${n}</sup>√(${a}<sup>${m}</sup>)<br><b>النتيجة النهائية:</b> ${val}`;
+      document.getElementById('res3').innerHTML = `<b>النتيجة:</b> ${val}`;
     }
   </script>
 </body>
