@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حلال الأسس المحترف</title>
+  <title>المحنك لحل الأسس</title>
   
   <!-- PWA Settings -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1329">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="حلال الأسس">
+  <meta name="apple-mobile-web-app-title" content="المحنك لحل الأسس">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
@@ -22,20 +24,22 @@
     .tab-btn.active { border-bottom: 3px solid #00e89d; color: #00e89d; font-weight: bold; }
     .glass-card { background: rgba(21, 35, 62, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
     input { user-select: text !important; }
+    #crop-container { max-height: 300px; width: 100%; background: #000; display: none; margin-top: 10px; border-radius: 12px; overflow: hidden; }
+    #image-to-crop { max-width: 100%; display: block; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 select-none">
 
   <!-- Header -->
   <header class="w-full max-w-lg text-center my-2">
-    <h1 class="text-3xl font-extrabold text-[#00e89d] tracking-wide">حلال الأسس ⚡</h1>
-    <p class="text-xs text-slate-400 mt-1">الحل الذكي الشامل لمسائل المعادلات والأسس</p>
+    <h1 class="text-3xl font-extrabold text-[#00e89d] tracking-wide">المحنك لحل الأسس ⚡</h1>
+    <p class="text-xs text-slate-400 mt-1">الحل الذكي الشامل لمعادلات الأسس والقص والتحليل الضوئي</p>
   </header>
 
   <!-- Navigation Bar -->
   <nav class="flex w-full max-w-lg glass-card rounded-2xl mb-4 p-1.5 justify-around text-sm font-semibold shadow-2xl">
     <button onclick="switchTab('calc')" id="btn-calc" class="tab-btn active py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الحاسبة 🧮</button>
-    <button onclick="switchTab('cam')" id="btn-cam" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الكاميرا 📷</button>
+    <button onclick="switchTab('cam')" id="btn-cam" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الكاميرا والقص 📷</button>
     <button onclick="switchTab('rules')" id="btn-rules" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">القواعد 📖</button>
   </nav>
 
@@ -72,26 +76,33 @@
       </div>
     </div>
 
-    <!-- TAB 2: CAMERA -->
+    <!-- TAB 2: CAMERA & CROPPER -->
     <div id="tab-cam" class="glass-card rounded-3xl p-5 shadow-2xl hidden space-y-4">
       <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
-        <span>📷</span> الكاميرا والماسح الضوئي
+        <span>📷</span> الماسح الضوئي وقص المسألة
       </h2>
-      <p class="text-xs text-slate-400 leading-relaxed">التقط صورة لمعادلة الأسس للتعرف عليها وتحليلها تلقائياً.</p>
+      <p class="text-xs text-slate-400 leading-relaxed">التقط صورة أو اختر من الاستوديو، قم بقص المسألة بدقة للحصول على أسرع نتيجة.</p>
       
-      <div class="flex flex-col items-center gap-4 pt-2">
-        <input type="file" id="cam-input" accept="image/*" capture="environment" class="hidden" onchange="processImage(this)">
+      <div class="flex flex-col items-center gap-3">
+        <input type="file" id="cam-input" accept="image/*" class="hidden" onchange="initCropper(this)">
         <button onclick="document.getElementById('cam-input').click()" class="w-full bg-[#00e89d] text-slate-950 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
-          📷 تشغيل الكاميرا / اختيار صورة
+          📂 اختر صورة أو التقط من الكاميرا
+        </button>
+
+        <!-- Crop Area -->
+        <div id="crop-container">
+          <img id="image-to-crop" alt="صورة للقص">
+        </div>
+        <button id="crop-btn" onclick="performCropAndSolve()" class="w-full bg-sky-500 text-slate-950 font-bold py-2.5 rounded-xl hidden shadow-lg active:scale-95 transition">
+          ✂️ تأكيد القص والحل الفوري
         </button>
         
-        <div id="ocr-status" class="text-xs text-amber-400 font-bold hidden animate-pulse">جاري تحليل الصورة...</div>
-        <img id="image-preview" class="max-h-48 rounded-2xl border border-slate-700 hidden w-full object-contain shadow-md">
+        <div id="ocr-status" class="text-xs text-amber-400 font-bold hidden animate-pulse">جاري تحليل ومعالجة المسألة...</div>
         
         <div id="cam-output" class="w-full p-4 bg-[#060d1d] rounded-2xl border border-slate-800 hidden space-y-2">
-          <div class="text-xs text-slate-400">النص المتعرق عليه:</div>
+          <div class="text-xs text-slate-400">النص المستخرج:</div>
           <div id="ocr-text" class="text-sm text-white font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800"></div>
-          <div class="text-xs text-slate-400 border-t border-slate-800 pt-2">النتيجة:</div>
+          <div class="text-xs text-slate-400 border-t border-slate-800 pt-2">النتيجة النهائية:</div>
           <div id="cam-result" class="text-xl font-bold text-[#00e89d]"></div>
         </div>
       </div>
@@ -129,16 +140,13 @@
   </main>
 
   <footer class="w-full max-w-lg text-center my-3 text-[10px] text-slate-500">
-    تطبيق حلال الأسس الشامل © 2026
+    تطبيق المحنك لحل الأسس © 2026
   </footer>
 
   <script>
-    // Register Service Worker for PWA Installation
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered'))
-          .catch(err => console.log('SW Error', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error', err));
       });
     }
 
@@ -180,42 +188,74 @@
       output.classList.remove('hidden');
     }
 
-    async function processImage(input) {
+    let cropper = null;
+
+    function initCropper(input) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
-      const img = document.getElementById('image-preview');
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const imgElement = document.getElementById('image-to-crop');
+        imgElement.src = e.target.result;
+        document.getElementById('crop-container').style.display = 'block';
+        document.getElementById('crop-btn').classList.remove('hidden');
+        document.getElementById('cam-output').classList.add('hidden');
+
+        if (cropper) {
+          cropper.destroy();
+        }
+
+        cropper = new Cropper(imgElement, {
+          aspectRatio: NaN,
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function performCropAndSolve() {
+      if (!cropper) return;
+      
+      const canvas = cropper.getCroppedCanvas();
       const status = document.getElementById('ocr-status');
       const output = document.getElementById('cam-output');
       const ocrText = document.getElementById('ocr-text');
       const camResult = document.getElementById('cam-result');
 
-      img.src = URL.createObjectURL(file);
-      img.classList.remove('hidden');
+      document.getElementById('crop-container').style.display = 'none';
+      document.getElementById('crop-btn').classList.add('hidden');
       status.classList.remove('hidden');
-      output.classList.add('hidden');
 
-      try {
-        const worker = await Tesseract.createWorker('eng');
-        const ret = await worker.recognize(file);
-        await worker.terminate();
+      canvas.toBlob(async (blob) => {
+        try {
+          const worker = await Tesseract.createWorker('eng');
+          await worker.setParameters({
+            tessedit_char_whitelist: '0123456789+-*/^xX= ',
+          });
 
-        const text = ret.data.text.trim();
-        ocrText.innerText = text || "تعذر قراءة النص";
-        
-        const match = text.match(/(\d+)\s*[\^𝖝*]\s*(\d+)/);
-        if (match) {
-          const b = parseFloat(match[1]);
-          const e = parseFloat(match[2]);
-          camResult.innerText = `${b}^${e} = ${Math.pow(b, e)}`;
-        } else {
-          camResult.innerText = "يرجى التأكد من وضوح الصورة كـ (a^b)";
+          const ret = await worker.recognize(blob);
+          await worker.terminate();
+
+          const text = ret.data.text.trim();
+          ocrText.innerText = text || "لم يتم التعرف على أرقام واضحة";
+          
+          const match = text.match(/(\d+)\s*[\^xX*]?\s*(\d+)/);
+          if (match) {
+            const b = parseFloat(match[1]);
+            const e = parseFloat(match[2]);
+            camResult.innerText = `${b}^${e} = ${Math.pow(b, e)}`;
+          } else {
+            camResult.innerText = "تأكد من تحديد المعادلة بوضوح (مثال: 2^3)";
+          }
+
+          status.classList.add('hidden');
+          output.classList.remove('hidden');
+        } catch (err) {
+          console.error(err);
+          status.innerText = "حدث خطأ في القراءة، حاول قص المسألة بدقة أكبر.";
         }
-
-        status.classList.add('hidden');
-        output.classList.remove('hidden');
-      } catch (err) {
-        status.innerText = "حدث خطأ أثناء معالجة الصورة.";
-      }
+      }, 'image/png');
     }
   </script>
 </body>
