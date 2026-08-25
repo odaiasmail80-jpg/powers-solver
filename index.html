@@ -2,210 +2,215 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>المحنك لحل الأسس</title>
-  
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b1329">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="المحنك لحل الأسس">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  
   <style>
-    * { -webkit-tap-highlight-color: transparent; user-select: none; }
-    body { font-family: 'Cairo', sans-serif; background-color: #0b1329; color: #f1f5f9; overflow-x: hidden; }
-    .tab-btn.active { border-bottom: 3px solid #00e89d; color: #00e89d; font-weight: bold; }
-    .glass-card { background: rgba(21, 35, 62, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    input { user-select: text !important; }
-    #crop-container { max-height: 280px; width: 100%; background: #000; display: none; margin-top: 10px; border-radius: 12px; overflow: hidden; }
-    #image-to-crop { max-width: 100%; display: block; }
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent: #0088cc;
+      --text: #ffffff;
+      --border: #30363d;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-sizing: border-box;
+    }
+    h2 { text-align: center; color: var(--accent); margin-top: 0; font-size: 20px; }
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 10px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .field { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 5px; font-size: 14px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0d1117;
+      color: #fff;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    button.calc-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .result-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: #0d1117;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      word-break: break-all;
+      font-size: 15px;
+      line-height: 1.5;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 select-none">
+<body>
 
-  <header class="w-full max-w-lg text-center my-2">
-    <h1 class="text-3xl font-extrabold text-[#00e89d] tracking-wide">المحنك لحل الأسس ⚡</h1>
-    <p class="text-xs text-slate-400 mt-1">الحل الفوري السريع بدون إنترنت</p>
-  </header>
+  <div class="card">
+    <h2>⚡ حلال مسائل الأسس الشامل</h2>
 
-  <nav class="flex w-full max-w-lg glass-card rounded-2xl mb-4 p-1.5 justify-around text-sm font-semibold shadow-2xl">
-    <button onclick="switchTab('calc')" id="btn-calc" class="tab-btn active py-2.5 px-3 flex-1 text-center rounded-xl transition-all">الحاسبة الفورية 🧮</button>
-    <button onclick="switchTab('cam')" id="btn-cam" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">القص السريع ✂️</button>
-    <button onclick="switchTab('rules')" id="btn-rules" class="tab-btn py-2.5 px-3 flex-1 text-center rounded-xl transition-all">القواعد 📖</button>
-  </nav>
-
-  <main class="w-full max-w-lg flex-1">
-    
-    <!-- TAB 1: CALCULATOR -->
-    <div id="tab-calc" class="glass-card rounded-3xl p-5 shadow-2xl space-y-5">
-      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
-        <span>⚡</span> الحاسبة السريعة بدون إنترنت
-      </h2>
-      
-      <div class="space-y-3">
-        <label class="block text-xs font-semibold text-slate-300">حساب قيمة أس مباشر (aᵇ):</label>
-        <div class="flex gap-2 dir-ltr">
-          <input type="number" id="base" placeholder="الأساس (a)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-[#00e89d]">
-          <input type="number" id="exponent" placeholder="الأس (b)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-[#00e89d]">
-        </div>
-        <button onclick="calculateDirectPower()" class="w-full bg-[#00e89d] text-slate-950 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition">احسب فوراً</button>
-      </div>
-
-      <div class="space-y-3 border-t border-slate-700/50 pt-4">
-        <label class="block text-xs font-semibold text-slate-300">حل المجهول في الأس (aˣ = c):</label>
-        <div class="flex gap-2 dir-ltr">
-          <input type="number" id="eq-base" placeholder="الأساس (a)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-sky-400">
-          <input type="number" id="eq-target" placeholder="الناتج (c)" class="w-1/2 bg-[#060d1d] border border-slate-700 rounded-xl p-3 text-center text-white font-bold focus:outline-none focus:border-sky-400">
-        </div>
-        <button onclick="solveExponentVariable()" class="w-full bg-sky-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition">أوجد قيمة (x) فوراً</button>
-      </div>
-
-      <div id="calc-output" class="p-4 bg-[#060d1d] rounded-2xl border border-slate-800 hidden text-center shadow-inner">
-        <div class="text-xs text-slate-400 mb-1">النتيجة:</div>
-        <div id="calc-result" class="text-2xl font-black text-[#00e89d]"></div>
-      </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('p1', event)">أس مباشر</button>
+      <button class="tab-btn" onclick="switchTab('p2', event)">ضرب الأسس</button>
+      <button class="tab-btn" onclick="switchTab('p3', event)">قسمة الأسس</button>
+      <button class="tab-btn" onclick="switchTab('p4', event)">قوة القوة</button>
+      <button class="tab-btn" onclick="switchTab('p5', event)">أس كسر / جذر</button>
     </div>
 
-    <!-- TAB 2: CROP & EXTRACT -->
-    <div id="tab-cam" class="glass-card rounded-3xl p-5 shadow-2xl hidden space-y-4">
-      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
-        <span>✂️</span> قص الصورة والاستخراج الفوري
-      </h2>
-      <p class="text-xs text-slate-400 leading-relaxed">اختر صورة المسألة، قم بقص الرقمين (الأساس والأس) بدقة وسيعطيك النتيجة بدون إنترنت وفي ميكروثانية.</p>
-      
-      <div class="flex flex-col items-center gap-3">
-        <input type="file" id="cam-input" accept="image/*" class="hidden" onchange="initCropper(this)">
-        <button onclick="document.getElementById('cam-input').click()" class="w-full bg-[#00e89d] text-slate-950 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
-          📂 اختر الصورة من الاستوديو
-        </button>
-
-        <div id="crop-container">
-          <img id="image-to-crop" alt="قص الصورة">
-        </div>
-        <button id="crop-btn" onclick="fastExtractAndCalculate()" class="w-full bg-sky-500 text-slate-950 font-bold py-2.5 rounded-xl hidden shadow-lg active:scale-95 transition">
-          🚀 استخراج الحل الفوري
-        </button>
-        
-        <div id="cam-output" class="w-full p-4 bg-[#060d1d] rounded-2xl border border-slate-800 hidden space-y-2 text-center">
-          <div class="text-xs text-slate-400">النتيجة المحسوبة محلياً:</div>
-          <div id="cam-result" class="text-2xl font-bold text-[#00e89d]"></div>
-        </div>
-      </div>
+    <!-- 1. الأس المباشر -->
+    <div id="p1" class="panel active">
+      <div class="field"><label>الأساس (a):</label><input type="number" id="base1" placeholder="مثال: 2"></div>
+      <div class="field"><label>الأس (n):</label><input type="number" id="exp1" placeholder="مثال: -3 أو 5"></div>
+      <button class="calc-btn" onclick="calcPower()">حساب aⁿ</button>
+      <div class="result-box" id="res1">النتيجة ستظهر هنا...</div>
     </div>
 
-    <!-- TAB 3: RULES -->
-    <div id="tab-rules" class="glass-card rounded-3xl p-5 shadow-2xl hidden space-y-3">
-      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700/50 pb-2 flex items-center gap-2">
-        <span>📖</span> قواعد الأسس
-      </h2>
-      <div class="space-y-2.5 text-xs">
-        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800">
-          <div class="font-bold text-[#00e89d] text-sm">ضرب الأسس</div>
-          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">aⁿ × aᵐ = a⁽ⁿ⁺ᵐ⁾</div>
-        </div>
-        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800">
-          <div class="font-bold text-[#00e89d] text-sm">قسمة الأسس</div>
-          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">aⁿ ÷ aᵐ = a⁽ⁿ⁻ᵐ⁾</div>
-        </div>
-        <div class="bg-[#060d1d] p-3 rounded-xl border border-slate-800">
-          <div class="font-bold text-[#00e89d] text-sm">قوة القوة</div>
-          <div class="text-slate-200 dir-ltr text-right mt-1 font-mono text-sm">(aⁿ)ᵐ = a⁽ⁿᵐ⁾</div>
-        </div>
-      </div>
+    <!-- 2. ضرب الأسس -->
+    <div id="p2" class="panel">
+      <div class="field"><label>الأساس المشترك (a):</label><input type="number" id="base2" placeholder="مثال: 3"></div>
+      <div class="field"><label>الأس الأول (m):</label><input type="number" id="exp2_1" placeholder="مثال: 4"></div>
+      <div class="field"><label>الأس الثاني (n):</label><input type="number" id="exp2_2" placeholder="مثال: 2"></div>
+      <button class="calc-btn" onclick="calcMultiply()">حساب aᵐ × aⁿ</button>
+      <div class="result-box" id="res2">النتيجة ستظهر هنا...</div>
     </div>
 
-  </main>
+    <!-- 3. قسمة الأسس -->
+    <div id="p3" class="panel">
+      <div class="field"><label>الأساس المشترك (a):</label><input type="number" id="base3" placeholder="مثال: 5"></div>
+      <div class="field"><label>أس البسط (m):</label><input type="number" id="exp3_1" placeholder="مثال: 7"></div>
+      <div class="field"><label>أس المقام (n):</label><input type="number" id="exp3_2" placeholder="مثال: 3"></div>
+      <button class="calc-btn" onclick="calcDivide()">حساب aᵐ ÷ aⁿ</button>
+      <div class="result-box" id="res3">النتيجة ستظهر هنا...</div>
+    </div>
 
-  <footer class="w-full max-w-lg text-center my-3 text-[10px] text-slate-500">
-    تطبيق المحنك لحل الأسس © 2026 (بدون إنترنت)
-  </footer>
+    <!-- 4. قوة القوة -->
+    <div id="p4" class="panel">
+      <div class="field"><label>الأساس (a):</label><input type="number" id="base4" placeholder="مثال: 2"></div>
+      <div class="field"><label>الأس الداخلي (m):</label><input type="number" id="exp4_1" placeholder="مثال: 3"></div>
+      <div class="field"><label>الأس الخارجي (n):</label><input type="number" id="exp4_2" placeholder="مثال: 4"></div>
+      <button class="calc-btn" onclick="calcPowerOfPower()">حساب (aᵐ)ⁿ</button>
+      <div class="result-box" id="res4">النتيجة ستظهر هنا...</div>
+    </div>
+
+    <!-- 5. الأس الكسري والجذور -->
+    <div id="p5" class="panel">
+      <div class="field"><label>الأساس (a):</label><input type="number" id="base5" placeholder="مثال: 27"></div>
+      <div class="field"><label>البسط - قوة (m):</label><input type="number" id="exp5_m" placeholder="مثال: 2"></div>
+      <div class="field"><label>المقام - دليل الجذر (n):</label><input type="number" id="exp5_n" placeholder="مثال: 3"></div>
+      <button class="calc-btn" onclick="calcFractional()">حساب aᵐ/ⁿ (ⁿ√aᵐ)</button>
+      <div class="result-box" id="res5">النتيجة ستظهر هنا...</div>
+    </div>
+
+  </div>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error', err));
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
       });
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById('tab-' + tab).classList.remove('hidden');
-      document.getElementById('btn-' + tab).classList.add('active');
+    function switchTab(panelId, event) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+      event.target.classList.add('active');
     }
 
-    function calculateDirectPower() {
-      const b = parseFloat(document.getElementById('base').value);
-      const e = parseFloat(document.getElementById('exponent').value);
-      const output = document.getElementById('calc-output');
-      const res = document.getElementById('calc-result');
-
-      if (isNaN(b) || isNaN(e)) {
-        alert("يرجى إدخال الأرقام بشكل صحيح");
-        return;
-      }
-      res.innerHTML = `${b}<sup>${e}</sup> = ${Math.pow(b, e)}`;
-      output.classList.remove('hidden');
+    function computePower(b, e) {
+      if (b === 0n && e <= 0n) return "خطأ رياضيات (كمية غير معينة)";
+      if (e === 0n) return "1";
+      if (e > 0n) return (b ** e).toString();
+      const posExp = -e;
+      const val = b ** posExp;
+      return `1 / ${val.toString()} (≈ ${(1 / Number(val)).toFixed(8)})`;
     }
 
-    function solveExponentVariable() {
-      const b = parseFloat(document.getElementById('eq-base').value);
-      const c = parseFloat(document.getElementById('eq-target').value);
-      const output = document.getElementById('calc-output');
-      const res = document.getElementById('calc-result');
-
-      if (isNaN(b) || isNaN(c) || b <= 0 || c <= 0 || b === 1) {
-        alert("تأكد من صحة القيم المدخلة");
-        return;
-      }
-      const x = Math.log(c) / Math.log(b);
-      res.innerHTML = `x = ${parseFloat(x.toFixed(4))}`;
-      output.classList.remove('hidden');
+    function calcPower() {
+      const b = document.getElementById('base1').value, e = document.getElementById('exp1').value;
+      if (!b || !e) return document.getElementById('res1').innerText = "⚠️ أدخل البيانات كاملة";
+      document.getElementById('res1').innerHTML = `<b>النتيجة:</b> ${computePower(BigInt(b), BigInt(e))}`;
     }
 
-    let cropper = null;
+    function calcMultiply() {
+      const b = document.getElementById('base2').value, e1 = document.getElementById('exp2_1').value, e2 = document.getElementById('exp2_2').value;
+      if (!b || !e1 || !e2) return document.getElementById('res2').innerText = "⚠️ أدخل البيانات كاملة";
+      const totalExp = BigInt(e1) + BigInt(e2);
+      document.getElementById('res2').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
+    }
 
-    function initCropper(input) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      const reader = new FileReader();
+    function calcDivide() {
+      const b = document.getElementById('base3').value, e1 = document.getElementById('exp3_1').value, e2 = document.getElementById('exp3_2').value;
+      if (!b || !e1 || !e2) return document.getElementById('res3').innerText = "⚠️ أدخل البيانات كاملة";
+      const totalExp = BigInt(e1) - BigInt(e2);
+      document.getElementById('res3').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
+    }
+
+    function calcPowerOfPower() {
+      const b = document.getElementById('base4').value, e1 = document.getElementById('exp4_1').value, e2 = document.getElementById('exp4_2').value;
+      if (!b || !e1 || !e2) return document.getElementById('res4').innerText = "⚠️ أدخل البيانات كاملة";
+      const totalExp = BigInt(e1) * BigInt(e2);
+      document.getElementById('res4').innerHTML = `<b>الصيغة المتبسطة:</b> ${b}<sup>${totalExp}</sup><br><b>النتيجة النهائية:</b> ${computePower(BigInt(b), totalExp)}`;
+    }
+
+    function calcFractional() {
+      const a = parseFloat(document.getElementById('base5').value);
+      const m = parseFloat(document.getElementById('exp5_m').value);
+      const n = parseFloat(document.getElementById('exp5_n').value);
+      if (isNaN(a) || isNaN(m) || isNaN(n) || n === 0) return document.getElementById('res5').innerText = "⚠️ أدخل أرقاماً صحيحة (المقام لا يساوي 0)";
       
-      reader.onload = function(e) {
-        const imgElement = document.getElementById('image-to-crop');
-        imgElement.src = e.target.result;
-        document.getElementById('crop-container').style.display = 'block';
-        document.getElementById('crop-btn').classList.remove('hidden');
-        document.getElementById('cam-output').classList.add('hidden');
-
-        if (cropper) cropper.destroy();
-        cropper = new Cropper(imgElement, { aspectRatio: NaN, viewMode: 1 });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function fastExtractAndCalculate() {
-      if (!cropper) return;
-      
-      // فتح نافذة إدخال سريعة للمستخدم لتدوين الأساس والأس المستخرج بصرياً للسرعة القصوى والعمل بدون نت
-      const val1 = prompt("أدخل الأساس (الرقم الكبير):", "2");
-      const val2 = prompt("أدخل الأس (الرقم الصغير المرتفع):", "3");
-
-      if (val1 !== null && val2 !== null) {
-        const b = parseFloat(val1);
-        const e = parseFloat(val2);
-        
-        document.getElementById('crop-container').style.display = 'none';
-        document.getElementById('crop-btn').classList.add('hidden');
-        
-        const camResult = document.getElementById('cam-result');
-        camResult.innerHTML = `${b}<sup>${e}</sup> = ${Math.pow(b, e)}`;
-        document.getElementById('cam-output').classList.remove('hidden');
-      }
+      const val = Math.pow(a, m / n);
+      document.getElementById('res5').innerHTML = `<b>الصيغة الجذرية:</b> <sup>${n}</sup>√(${a}<sup>${m}</sup>)<br><b>النتيجة النهائية:</b> ${val}`;
     }
   </script>
 </body>
