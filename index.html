@@ -1,18 +1,207 @@
-
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>حلال الأسس</title>
+  <title>حلال الأسس الشامل</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <style> body { font-family: 'Cairo', sans-serif; background-color: #060d18; color: #e8edf5; } </style>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #0b1329; color: #f1f5f9; }
+    .tab-btn.active { border-bottom: 3px solid #00e89d; color: #00e89d; font-weight: bold; }
+  </style>
 </head>
-<body class="flex flex-col min-h-screen items-center justify-center p-4">
-  <div class="bg-[#111d33] border border-[#1e3354] rounded-2xl p-6 text-center max-w-md w-full shadow-2xl">
-    <h1 class="text-2xl font-bold text-[#00e89d] mb-3">حلال الأسس</h1>
-    <p class="text-[#7b8faa] text-sm mb-4">التطبيق يعمل بنجاح ومستعد للاستخدام!</p>
-  </div>
-</body>
-</html>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6">
 
+  <header class="w-full max-w-lg text-center my-4">
+    <h1 class="text-3xl font-bold text-[#00e89d] mb-1">حلال الأسس الشامل ⚡</h1>
+    <p class="text-xs text-slate-400">حاسبة متقدمة | كاميرا ماسحة | دليل جميع القواعد</p>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="flex w-full max-w-lg bg-[#15233e] rounded-xl mb-4 p-1 justify-around text-sm font-semibold border border-[#213559]">
+    <button onclick="switchTab('calc')" id="btn-calc" class="tab-btn active py-2 px-3 flex-1 text-center">الحاسبة</button>
+    <button onclick="switchTab('cam')" id="btn-cam" class="tab-btn py-2 px-3 flex-1 text-center">الكاميرا 📷</button>
+    <button onclick="switchTab('rules')" id="btn-rules" class="tab-btn py-2 px-3 flex-1 text-center">القواعد 📖</button>
+  </div>
+
+  <main class="w-full max-w-lg">
+    
+    <!-- SECTION 1: MANUAL CALCULATOR -->
+    <div id="tab-calc" class="bg-[#15233e] border border-[#213559] rounded-2xl p-5 shadow-xl">
+      <h2 class="text-lg font-bold text-slate-200 mb-4 border-b border-[#213559] pb-2">حاسبة الأسس والمعادلات</h2>
+      
+      <!-- Direct Power -->
+      <div class="space-y-3 mb-6">
+        <label class="block text-xs font-semibold text-slate-300">حساب قيمة أس مباشر (aᵇ):</label>
+        <div class="flex gap-2 dir-ltr">
+          <input type="number" id="base" placeholder="الأساس (a)" class="w-1/2 bg-[#0b1329] border border-[#253d66] rounded-lg p-2.5 text-center text-white focus:outline-none focus:border-[#00e89d]">
+          <input type="number" id="exponent" placeholder="الأس (b)" class="w-1/2 bg-[#0b1329] border border-[#253d66] rounded-lg p-2.5 text-center text-white focus:outline-none focus:border-[#00e89d]">
+        </div>
+        <button onclick="calculateDirectPower()" class="w-full bg-[#00e89d] text-slate-900 font-bold py-2.5 rounded-lg hover:bg-[#00c785] transition">احسب الناتج</button>
+      </div>
+
+      <!-- Logarithmic / Equation Solver -->
+      <div class="space-y-3">
+        <label class="block text-xs font-semibold text-slate-300">حل المجهول في الأس (aˣ = c):</label>
+        <div class="flex gap-2 dir-ltr">
+          <input type="number" id="eq-base" placeholder="الأساس (a)" class="w-1/2 bg-[#0b1329] border border-[#253d66] rounded-lg p-2.5 text-center text-white focus:outline-none focus:border-[#00e89d]">
+          <input type="number" id="eq-target" placeholder="الناتج (c)" class="w-1/2 bg-[#0b1329] border border-[#253d66] rounded-lg p-2.5 text-center text-white focus:outline-none focus:border-[#00e89d]">
+        </div>
+        <button onclick="solveExponentVariable()" class="w-full bg-[#38bdf8] text-slate-900 font-bold py-2.5 rounded-lg hover:bg-[#0284c7] transition">أوجد قيمة الأس المجهول (x)</button>
+      </div>
+
+      <!-- Output Result -->
+      <div id="calc-output" class="mt-5 p-4 bg-[#0b1329] rounded-xl border border-[#253d66] hidden text-center">
+        <div class="text-xs text-slate-400 mb-1">النتيجة والخطوات:</div>
+        <div id="calc-result" class="text-xl font-bold text-[#00e89d]"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: CAMERA SCANNER -->
+    <div id="tab-cam" class="bg-[#15233e] border border-[#213559] rounded-2xl p-5 shadow-xl hidden">
+      <h2 class="text-lg font-bold text-slate-200 mb-2 border-b border-[#213559] pb-2">مسح معادلة من الكاميرا</h2>
+      <p class="text-xs text-slate-400 mb-4">التقط صورة واضحة لمعادلة الأسس من كتابك أو الورقة لحلها تلقائياً.</p>
+      
+      <div class="flex flex-col items-center gap-4">
+        <input type="file" id="cam-input" accept="image/*" capture="environment" class="hidden" onchange="processImage(this)">
+        <button onclick="document.getElementById('cam-input').click()" class="w-full bg-[#00e89d] text-slate-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[#00c785]">
+          📷 فتح الكاميرا / اختيار صورة
+        </button>
+        
+        <div id="ocr-status" class="text-xs text-amber-400 font-semibold hidden">جاري قراءة الصورة وتوسيط المعطيات...</div>
+        <img id="image-preview" class="max-h-48 rounded-lg border border-[#253d66] hidden w-full object-contain">
+        
+        <div id="cam-output" class="w-full p-4 bg-[#0b1329] rounded-xl border border-[#253d66] hidden">
+          <div class="text-xs text-slate-400 mb-1">النص المستخرج:</div>
+          <div id="ocr-text" class="text-base text-white font-mono mb-2"></div>
+          <div class="text-xs text-slate-400 mb-1 border-t border-[#213559] pt-2">التحليل والتأويل:</div>
+          <div id="cam-result" class="text-lg font-bold text-[#00e89d]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: EXPONENT RULES -->
+    <div id="tab-rules" class="bg-[#15233e] border border-[#213559] rounded-2xl p-5 shadow-xl hidden space-y-4">
+      <h2 class="text-lg font-bold text-slate-200 border-b border-[#213559] pb-2">جميع قواعد الأسس الرياضية</h2>
+      
+      <div class="space-y-3 text-sm">
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">1. ضرب الأسس المتشابهة الأساس:</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">aⁿ × aᵐ = a⁽ⁿ⁺ᵐ⁾</div>
+          <div class="text-xs text-slate-400 mt-1">عند ضرب الأساسات المتشابهة، نجمع الأسس. (مثال: 2³ × 2⁴ = 2⁷ = 128)</div>
+        </div>
+
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">2. قسمة الأسس المتشابهة الأساس:</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">aⁿ ÷ aᵐ = a⁽ⁿ⁻ᵐ⁾</div>
+          <div class="text-xs text-slate-400 mt-1">عند قسمة الأساسات المتشابهة، نطرح الأسس. (مثال: 5⁶ ÷ 5² = 5⁴ = 625)</div>
+        </div>
+
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">3. رفع أُس لأُس آخر (قوة القوة):</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">(aⁿ)ᵐ = a⁽ⁿᵐ⁾</div>
+          <div class="text-xs text-slate-400 mt-1">نضرب الأس الداخلي في الخارجي. (مثال: (3²)³ = 3⁶ = 729)</div>
+        </div>
+
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">4. الأس الصخري (الصفر):</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">a⁰ = 1  (حيث a ≠ 0)</div>
+          <div class="text-xs text-slate-400 mt-1">أي عدد مرفوع للأس صفر يساوي 1.</div>
+        </div>
+
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">5. الأس السالب:</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">a⁻ⁿ = 1 / aⁿ</div>
+          <div class="text-xs text-slate-400 mt-1">الأس السالب ينزل إلى المقام ليصبح موجباً. (مثال: 2⁻³ = 1 / 2³ = 1/8)</div>
+        </div>
+
+        <div class="bg-[#0b1329] p-3 rounded-lg border border-[#253d66]">
+          <div class="font-bold text-[#00e89d]">6. الأس الكسري (الجذور):</div>
+          <div class="text-slate-300 dir-ltr text-right mt-1 font-mono">a⁽ᵐ/ⁿ⁾ = ⁿ√(aᵐ)</div>
+          <div class="text-xs text-slate-400 mt-1">المقام يتحول إلى رتبة الجذر والبسط هو الأس. (مثال: 8⁽²/³⁾ = ³√(8²) = 4)</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+      document.getElementById('btn-' + tab).classList.add('active');
+    }
+
+    function calculateDirectPower() {
+      const b = parseFloat(document.getElementById('base').value);
+      const e = parseFloat(document.getElementById('exponent').value);
+      const output = document.getElementById('calc-output');
+      const res = document.getElementById('calc-result');
+
+      if (isNaN(b) || isNaN(e)) {
+        alert("يرجى إدخال الأساس والأس بشكل صحيح");
+        return;
+      }
+
+      const ans = Math.pow(b, e);
+      res.innerHTML = `${b}<sup>${e}</sup> = ${ans}`;
+      output.classList.remove('hidden');
+    }
+
+    function solveExponentVariable() {
+      const b = parseFloat(document.getElementById('eq-base').value);
+      const c = parseFloat(document.getElementById('eq-target').value);
+      const output = document.getElementById('calc-output');
+      const res = document.getElementById('calc-result');
+
+      if (isNaN(b) || isNaN(c) || b <= 0 || c <= 0 || b === 1) {
+        alert("يرجى إدخال أعداد موجبة مع مراعاة أن الأساس لا يساوي 1");
+        return;
+      }
+
+      const x = Math.log(c) / Math.log(b);
+      res.innerHTML = `قيمة الأس المجهول x = ${parseFloat(x.toFixed(4))}<br><span class="text-xs text-slate-400">حيث: ${b}<sup>x</sup> = ${c}</span>`;
+      output.classList.remove('hidden');
+    }
+
+    async function processImage(input) {
+      if (!input.files || !input.files[0]) return;
+      
+      const file = input.files[0];
+      const img = document.getElementById('image-preview');
+      const status = document.getElementById('ocr-status');
+      const output = document.getElementById('cam-output');
+      const ocrText = document.getElementById('ocr-text');
+      const camResult = document.getElementById('cam-result');
+
+      img.src = URL.createObjectURL(file);
+      img.classList.remove('hidden');
+      status.classList.remove('hidden');
+      output.classList.add('hidden');
+
+      try {
+        const worker = await Tesseract.createWorker('eng');
+        const ret = await worker.recognize(file);
+        await worker.terminate();
+
+        const text = ret.data.text.trim();
+        ocrText.innerText = text || "لم يتم التعرف على أي نص";
+        
+        const match = text.match(/(\d+)\s*[\^𝖝*]\s*(\d+)/);
+        if (match) {
+          const b = parseFloat(match[1]);
+          const e = parseFloat(match[2]);
+          const ans = Math.pow(b, e);
+          camResult.innerText = `النتيجة المحسوبة: ${b}^${e} = ${ans}`;
+        } else {
+          camResult.innerText = "تعذر تحديد نمط الأسس تلقائياً، يرجى كتابتها في الحاسبة المباشرة.";
+        }
+
+        status.classList.add('hidden');
+        output.classList.remove('hidden');
+      } catch (err) {
+        status.innerText = "حدث خطأ أثناء معالجة الصورة.";
